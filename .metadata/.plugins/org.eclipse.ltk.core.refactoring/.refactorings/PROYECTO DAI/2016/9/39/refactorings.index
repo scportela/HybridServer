@@ -1,0 +1,15 @@
+1475078689403	Move compilation unit
+1475078728451	Delete element
+1475078776806	Rename package 'HybridServer.src.es.uvigo.esei.dai.hybridserver.http'
+1475078799123	Rename package 'HybridServer.src.es.uvigo.esei.dai.hybridserver'
+1475078868341	Rename package 'HybridServer.test.es.uvigo.esei.dai.hybridserver.utils'
+1475078880589	Rename package 'HybridServer.test.es.uvigo.esei.dai.hybridserver.utils.matchers'
+1475078891826	Rename package 'HybridServer.test.es.uvigo.esei.dai.hybridserver.week1'
+1475078900208	Rename package 'HybridServer.test.es.uvigo.esei.dai.hybridserver.week2'
+1475078909260	Rename package 'HybridServer.test.es.uvigo.esei.dai.hybridserver.week3'
+1475078923660	Rename package 'uvigo.esei.dai.hybridserver.utils.matchers'
+1475078931321	Rename package 'uvigo.esei.dai.hybridserver.week1'
+1475078939237	Rename package 'uvigo.esei.dai.hybridserver.week2'
+1475078979360	Rename package 'uvigo.esei.dai.hybridserver.week3'
+1475079040132	Rename package 'es.uvigo.esei.dai.hybridserver'
+1475079050299	Rename package 'HybridServer.test.es.uvigo.esei.dai.hybridserver'
