@@ -1,11 +1,15 @@
 package es.uvigo.esei.dai.hybridserver.http;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Map;
 
+import org.apache.http.HttpRequest;
+
 public class HTTPRequest {
-	
+
+	private HTTPRequestMethod method;
 	private String resourceChain;
 	private String[] resourcePath;
 	private String resourceName;
@@ -13,13 +17,11 @@ public class HTTPRequest {
 	private String httpVersion;
 	private Map<String, String> headerParameters;
 	private String content;
-	
 
 	public HTTPRequest(Reader reader) throws IOException, HTTPParseException {
-		int car;
-		while((car=reader.read())!=-1){
-			
-		}
+		BufferedReader br = new BufferedReader(reader);
+		String line = br.readLine();
+		
 	}
 
 	public HTTPRequestMethod getMethod() {
@@ -64,6 +66,8 @@ public class HTTPRequest {
 
 	public int getContentLength() {
 		// TODO Auto-generated method stub
+		if (content == null)
+			return 0;
 		return content.length();
 	}
 
