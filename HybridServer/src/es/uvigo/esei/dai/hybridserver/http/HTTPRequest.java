@@ -3,30 +3,76 @@ package es.uvigo.esei.dai.hybridserver.http;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.net.URLDecoder;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.http.HttpRequest;
 
 public class HTTPRequest {
 
 	private HTTPRequestMethod method;
 	private String resourceChain;
-	private String[] resourcePath;
+	private String[] resourcePath = new String[0];
 	private String resourceName;
-	private Map<String, String> resourceParameters;
+	private Map<String, String> resourceParameters = new LinkedHashMap<>();
 	private String httpVersion;
-	private Map<String, String> headerParameters;
+	private Map<String, String> headerParameters = new LinkedHashMap<>();
 	private String content;
 
 	public HTTPRequest(Reader reader) throws IOException, HTTPParseException {
-		BufferedReader br = new BufferedReader(reader);
-		String line = br.readLine();
-		
+		try (BufferedReader br = new BufferedReader(reader)) {
+
+			String line = br.readLine();
+			String[] aux = line.split(" ");
+			this.method = HTTPRequestMethod.valueOf(aux[0]);
+			this.resourceChain = aux[1];
+			this.httpVersion = aux[2];
+			while (!(line = br.readLine()).isEmpty()) {
+				aux = line.split(": ");
+				this.headerParameters.put(aux[0], aux[1]);
+			}
+			aux = this.resourceChain.split("\\?");
+			this.resourceName = aux[0].substring(1);
+			if (aux[0].length() > 1) {
+				this.resourcePath = aux[0].substring(1).split("/");
+			}
+
+			if (aux.length > 1) {
+				aux = aux[1].split("&");
+				String[] aux1;
+				for (int i = 0; i < aux.length; i++) {
+					aux1 = aux[i].split("=");
+					this.resourceParameters.put(aux1[0], aux1[1]);
+				}
+			}
+
+			if (this.headerParameters.containsKey("Content-Length")) {
+				char[] cont = new char[Integer.parseInt(this.headerParameters.get("Content-Length"))];
+				br.read(cont);
+				this.content = new String(cont);
+
+				String type = this.headerParameters.get("Content-Type");
+				if (type != null && type.startsWith("application/x-www-form-urlencoded")) {
+					content = URLDecoder.decode(content, "UTF-8");
+				}
+				aux = content.split("&");
+				System.out.println(content);
+				String[] aux1;
+				for (int i = 0; i < aux.length; i++) {
+					System.out.println(aux[i]);
+					aux1 = aux[i].split("=");
+					System.out.println(aux1[0]);
+					this.resourceParameters.put(aux1[0], aux1[1]);
+				}
+			}
+		}catch(Exception e){
+			throw new HTTPParseException(e.getMessage());
+		}
 	}
 
 	public HTTPRequestMethod getMethod() {
 		// TODO Auto-generated method stub
-		return null;
+		return method;
 	}
 
 	public String getResourceChain() {
@@ -68,7 +114,7 @@ public class HTTPRequest {
 		// TODO Auto-generated method stub
 		if (content == null)
 			return 0;
-		return content.length();
+		return Integer.parseInt(this.getHeaderParameters().get("Content-Length"));
 	}
 
 	@Override
