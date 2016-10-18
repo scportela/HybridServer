@@ -56,12 +56,9 @@ public class HTTPRequest {
 					content = URLDecoder.decode(content, "UTF-8");
 				}
 				aux = content.split("&");
-				System.out.println(content);
 				String[] aux1;
 				for (int i = 0; i < aux.length; i++) {
-					System.out.println(aux[i]);
 					aux1 = aux[i].split("=");
-					System.out.println(aux1[0]);
 					this.resourceParameters.put(aux1[0], aux1[1]);
 				}
 			}
