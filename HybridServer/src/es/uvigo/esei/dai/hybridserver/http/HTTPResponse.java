@@ -40,7 +40,7 @@ public class HTTPResponse {
 
 	public void setContent(String content) {
 		this.content = content;
-		this.putParameter("Content-Length", String.valueOf(this.content.length()));
+		this.putParameter("Content-Length", String.valueOf(content.length()));
 	}
 
 	public Map<String, String> getParameters() {
@@ -48,8 +48,7 @@ public class HTTPResponse {
 	}
 
 	public String putParameter(String name, String value) {
-		this.parameters.put(name, value);
-		return this.parameters.get(name);
+		return this.parameters.put(name, value);
 	}
 
 	public boolean containsParameter(String name) {

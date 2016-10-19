@@ -1,10 +1,10 @@
 package es.uvigo.esei.dai.hybridserver;
 
-import java.util.List;
-
 public interface Page {
 	public String getPage(String uuid);
-	public void createPage(String content);
+	public void createPage(String uuid,String content);
 	public boolean deletePage(String uuid);
-	public List<String> listPages();
+	public String listPages();
+	public String createLink(String uuid);
+	public boolean exists(String uuid);
 }

@@ -7,6 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 
 import es.uvigo.esei.dai.hybridserver.http.HTTPParseException;
 import es.uvigo.esei.dai.hybridserver.http.HTTPRequest;
@@ -49,16 +50,37 @@ public class HybridServer {
 							// Responder al cliente
 							HTTPRequest request = new HTTPRequest(new InputStreamReader(socket.getInputStream()));
 							HTTPResponse response = new HTTPResponse();
-							if(request.getMethod()==HTTPRequestMethod.POST){
-								if(request.getResourceParameters().get("html")==null) 
+							
+							response.setStatus(HTTPResponseStatus.S200);
+							response.setVersion(request.getHttpVersion());
+							response.putParameter("Content-Type", "text/html");
+
+							if (request.getMethod() == HTTPRequestMethod.POST) {
+								UUID randomUuid = UUID.randomUUID();
+								String uuid = randomUuid.toString();
+								if (request.getResourceParameters().get("html") == null)
 									response.setStatus(HTTPResponseStatus.S400);
-								pages.createPage(request.getContent());
+								pages.createPage(uuid, request.getResourceParameters().get("html"));
+								response.setContent(pages.createLink(uuid));
 							}
+							
 							if (request.getMethod() == HTTPRequestMethod.GET) {
-								String content = pages.getPage(request.getResourceParameters().get("uuid"));
-								response.setStatus(HTTPResponseStatus.S200);
-								response.setVersion(request.getHttpVersion());
-								response.setContent(content);
+								if (!request.getResourceName().startsWith("html")) {
+									response.setStatus(HTTPResponseStatus.S400);
+								} else {
+									if (request.getResourceParameters().get("uuid") == null) {
+										response.setContent(pages.listPages());
+									} else {
+										if(!pages.exists(request.getResourceParameters().get("uuid"))) response.setStatus(HTTPResponseStatus.S404);
+										else response.setContent(pages.getPage(request.getResourceParameters().get("uuid")));
+										
+										
+									}
+								}
+							}
+							
+							if(request.getMethod()==HTTPRequestMethod.DELETE){
+								pages.deletePage(request.getResourceParameters().get("uuid"));
 							}
 							OutputStreamWriter osw = new OutputStreamWriter(socket.getOutputStream());
 							response.print(osw);
@@ -75,6 +97,7 @@ public class HybridServer {
 
 		this.stop = false;
 		this.serverThread.start();
+
 	}
 
 	public void stop() {

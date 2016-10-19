@@ -7,7 +7,6 @@ import java.net.URLDecoder;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-
 public class HTTPRequest {
 
 	private HTTPRequestMethod method;
@@ -20,51 +19,59 @@ public class HTTPRequest {
 	private String content;
 
 	public HTTPRequest(Reader reader) throws IOException, HTTPParseException {
-		try (BufferedReader br = new BufferedReader(reader)) {
 
-			String line = br.readLine();
-			String[] aux = line.split(" ");
+		BufferedReader br = new BufferedReader(reader);
+		String line = br.readLine();
+		String[] aux = line.split(" ");
+		try {
 			this.method = HTTPRequestMethod.valueOf(aux[0]);
-			this.resourceChain = aux[1];
-			this.httpVersion = aux[2];
-			while (!(line = br.readLine()).isEmpty()) {
-				aux = line.split(": ");
-				this.headerParameters.put(aux[0], aux[1]);
-			}
-			aux = this.resourceChain.split("\\?");
-			this.resourceName = aux[0].substring(1);
-			if (aux[0].length() > 1) {
-				this.resourcePath = aux[0].substring(1).split("/");
-			}
-
-			if (aux.length > 1) {
-				aux = aux[1].split("&");
-				String[] aux1;
-				for (int i = 0; i < aux.length; i++) {
-					aux1 = aux[i].split("=");
-					this.resourceParameters.put(aux1[0], aux1[1]);
-				}
-			}
-
-			if (this.headerParameters.containsKey("Content-Length")) {
-				char[] cont = new char[Integer.parseInt(this.headerParameters.get("Content-Length"))];
-				br.read(cont);
-				this.content = new String(cont);
-
-				String type = this.headerParameters.get("Content-Type");
-				if (type != null && type.startsWith("application/x-www-form-urlencoded")) {
-					content = URLDecoder.decode(content, "UTF-8");
-				}
-				aux = content.split("&");
-				String[] aux1;
-				for (int i = 0; i < aux.length; i++) {
-					aux1 = aux[i].split("=");
-					this.resourceParameters.put(aux1[0], aux1[1]);
-				}
-			}
-		}catch(Exception e){
+		} catch (Exception e) {
 			throw new HTTPParseException(e.getMessage());
 		}
+		if (aux.length < 2)
+			throw new HTTPParseException("Missing resource");
+		this.resourceChain = aux[1];
+		if (aux.length < 3)
+			throw new HTTPParseException("Missing version");
+		this.httpVersion = aux[2];
+		while (!(line = br.readLine()).isEmpty()) {
+			aux = line.split(": ");
+			if (aux.length < 2)
+				throw new HTTPParseException("Invalid header");
+			this.headerParameters.put(aux[0], aux[1]);
+		}
+		aux = this.resourceChain.split("\\?");
+		this.resourceName = aux[0].substring(1);
+		if (aux[0].length() > 1) {
+			this.resourcePath = aux[0].substring(1).split("/");
+		}
+
+		if (aux.length > 1) {
+			aux = aux[1].split("&");
+			String[] aux1;
+			for (int i = 0; i < aux.length; i++) {
+				aux1 = aux[i].split("=");
+				this.resourceParameters.put(aux1[0], aux1[1]);
+			}
+		}
+
+		if (this.headerParameters.containsKey("Content-Length")) {
+			char[] cont = new char[Integer.parseInt(this.headerParameters.get("Content-Length"))];
+			br.read(cont);
+			this.content = new String(cont);
+
+			String type = this.headerParameters.get("Content-Type");
+			if (type != null && type.startsWith("application/x-www-form-urlencoded")) {
+				content = URLDecoder.decode(content, "UTF-8");
+			}
+			aux = content.split("&");
+			String[] aux1;
+			for (int i = 0; i < aux.length; i++) {
+				aux1 = aux[i].split("=");
+				this.resourceParameters.put(aux1[0], aux1[1]);
+			}
+		}
+
 	}
 
 	public HTTPRequestMethod getMethod() {

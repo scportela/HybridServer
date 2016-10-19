@@ -1,8 +1,7 @@
 package es.uvigo.esei.dai.hybridserver;
 
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Set;
 
 
 public class Server implements Page {
@@ -19,10 +18,8 @@ public class Server implements Page {
 	}
 
 	@Override
-	public void createPage(String content) {
+	public void createPage(String uuid,String content) {
 		// TODO Auto-generated method stub
-		UUID randomUuid = UUID.randomUUID();
-		String uuid = randomUuid.toString();
 
 		this.db.put(uuid, content);
 	}
@@ -36,9 +33,31 @@ public class Server implements Page {
 	}
 
 	@Override
-	public List<String> listPages() {
+	public String listPages() {
 		// TODO Auto-generated method stub
-		return (List<String>) this.db.keySet();
+		StringBuilder list = new StringBuilder();
+		for (String page : this.db.keySet()) {
+			list.append(createLink(page));
+		}
+		return this.db.keySet().toString();
+	}
+
+	@Override
+	public String createLink(String uuid) {
+		// TODO Auto-generated method stub
+		StringBuilder link = new StringBuilder();
+		link.append("<a href=\"html?uuid=");
+		link.append(uuid);
+		link.append("\">");
+		link.append(uuid);
+		link.append("</a>\r\n");
+		return link.toString();
+	}
+
+	@Override
+	public boolean exists(String uuid) {
+		// TODO Auto-generated method stub
+		return this.db.containsKey(uuid);
 	}
 
 }
