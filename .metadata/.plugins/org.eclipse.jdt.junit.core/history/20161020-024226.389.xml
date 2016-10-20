@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><testrun name="Rerun es.uvigo.esei.dai.hybridserver.week1.WelcomePageTest" project="HybridServer" tests="2" started="2" failures="0" errors="4" ignored="0">
+  <testsuite name="es.uvigo.esei.dai.hybridserver.week1.WelcomePageTest" time="0.0">
+    <testcase name="testMultipleWelcome" classname="es.uvigo.esei.dai.hybridserver.week1.WelcomePageTest" time="0.0">
+      <error>java.lang.NullPointerException
+	at es.uvigo.esei.dai.hybridserver.Server.&lt;init&gt;(Server.java:10)
+	at es.uvigo.esei.dai.hybridserver.HybridServer.&lt;init&gt;(HybridServer.java:31)
+	at es.uvigo.esei.dai.hybridserver.utils.HybridServerTestCase.createHybridServer(HybridServerTestCase.java:45)
+	at es.uvigo.esei.dai.hybridserver.utils.HybridServerTestCase.startServer(HybridServerTestCase.java:38)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
+	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:24)
+	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
+	at org.junit.internal.runners.statements.FailOnTimeout$CallableStatement.call(FailOnTimeout.java:298)
+	at org.junit.internal.runners.statements.FailOnTimeout$CallableStatement.call(FailOnTimeout.java:292)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.lang.Thread.run(Thread.java:745)
+
+java.lang.NullPointerException
+	at es.uvigo.esei.dai.hybridserver.utils.HybridServerTestCase.stopServer(HybridServerTestCase.java:50)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
+	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:33)
+	at org.junit.internal.runners.statements.FailOnTimeout$CallableStatement.call(FailOnTimeout.java:298)
+	at org.junit.internal.runners.statements.FailOnTimeout$CallableStatement.call(FailOnTimeout.java:292)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.lang.Thread.run(Thread.java:745)
+
+</error>
+    </testcase>
+    <testcase name="testWelcome" classname="es.uvigo.esei.dai.hybridserver.week1.WelcomePageTest" time="0.0">
+      <error>java.lang.NullPointerException
+	at es.uvigo.esei.dai.hybridserver.Server.&lt;init&gt;(Server.java:10)
+	at es.uvigo.esei.dai.hybridserver.HybridServer.&lt;init&gt;(HybridServer.java:31)
+	at es.uvigo.esei.dai.hybridserver.utils.HybridServerTestCase.createHybridServer(HybridServerTestCase.java:45)
+	at es.uvigo.esei.dai.hybridserver.utils.HybridServerTestCase.startServer(HybridServerTestCase.java:38)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
+	at org.junit.internal.runners.statements.RunBefores.evaluate(RunBefores.java:24)
+	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:27)
+	at org.junit.internal.runners.statements.FailOnTimeout$CallableStatement.call(FailOnTimeout.java:298)
+	at org.junit.internal.runners.statements.FailOnTimeout$CallableStatement.call(FailOnTimeout.java:292)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.lang.Thread.run(Thread.java:745)
+
+java.lang.NullPointerException
+	at es.uvigo.esei.dai.hybridserver.utils.HybridServerTestCase.stopServer(HybridServerTestCase.java:50)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)
+	at org.junit.internal.runners.statements.RunAfters.evaluate(RunAfters.java:33)
+	at org.junit.internal.runners.statements.FailOnTimeout$CallableStatement.call(FailOnTimeout.java:298)
+	at org.junit.internal.runners.statements.FailOnTimeout$CallableStatement.call(FailOnTimeout.java:292)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+	at java.lang.Thread.run(Thread.java:745)
+
+</error>
+    </testcase>
+  </testsuite>
+</testrun>

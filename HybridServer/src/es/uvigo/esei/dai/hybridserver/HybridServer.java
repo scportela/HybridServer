@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
@@ -19,10 +20,12 @@ public class HybridServer {
 	private static final int SERVICE_PORT = 8888;
 	private Thread serverThread;
 	private boolean stop;
-	private Server pages;
+	public Server pages;
+	
 
 	public HybridServer() {
 		// TODO Auto-generated constructor stub
+		
 	}
 
 	public HybridServer(Map<String, String> pages) {
@@ -43,6 +46,7 @@ public class HybridServer {
 			@Override
 			public void run() {
 				try (final ServerSocket serverSocket = new ServerSocket(SERVICE_PORT)) {
+					serverSocket.setSoTimeout(1000);
 					while (true) {
 						try (Socket socket = serverSocket.accept()) {
 							if (stop)
@@ -88,6 +92,7 @@ public class HybridServer {
 						}
 					}
 				} catch (IOException e) {
+										
 					e.printStackTrace();
 				} catch (HTTPParseException e) {
 					e.printStackTrace();

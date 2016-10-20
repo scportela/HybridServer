@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><testrun name="Rerun es.uvigo.esei.dai.hybridserver.week1.WelcomePageTest.testWelcome" project="HybridServer" tests="1" started="1" failures="0" errors="1" ignored="0">
+  <testcase name="testWelcome" classname="es.uvigo.esei.dai.hybridserver.week1.WelcomePageTest" time="4.629">
+    <error>org.junit.runners.model.TestTimedOutException: test timed out after 5 seconds
+	at java.util.concurrent.FutureTask.run(FutureTask.java:269)
+	at java.lang.Thread.run(Thread.java:745)
+
+</error>
+  </testcase>
+</testrun>
