@@ -1,12 +1,13 @@
 package es.uvigo.esei.dai.hybridserver;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 
-public class Server implements Page {
-	private Map<String, String> db;
+public class ServerMap implements Page {
+	private Map<String, String> db=new LinkedHashMap<>();
 
-	public Server(Map<String, String> pages) {
+	public ServerMap(Map<String, String> pages) {
 		db.putAll(pages);
 	}
 
@@ -61,4 +62,7 @@ public class Server implements Page {
 		return this.db.containsKey(uuid);
 	}
 
+	public Map<String, String> getDB(){
+		return db;
+	}
 }
