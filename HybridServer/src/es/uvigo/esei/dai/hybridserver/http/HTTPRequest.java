@@ -22,6 +22,7 @@ public class HTTPRequest {
 
 		BufferedReader br = new BufferedReader(reader);
 		String line = br.readLine();
+		System.out.println(line);
 		String[] aux = line.split(" ");
 		try {
 			this.method = HTTPRequestMethod.valueOf(aux[0]);
@@ -35,6 +36,7 @@ public class HTTPRequest {
 			throw new HTTPParseException("Missing version");
 		this.httpVersion = aux[2];
 		while (!(line = br.readLine()).isEmpty()) {
+			System.out.println(line);
 			aux = line.split(": ");
 			if (aux.length < 2)
 				throw new HTTPParseException("Invalid header");

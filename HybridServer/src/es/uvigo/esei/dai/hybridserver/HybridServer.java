@@ -56,7 +56,6 @@ public class HybridServer {
 			@Override
 			public void run() {
 				try (final ServerSocket serverSocket = new ServerSocket(SERVICE_PORT)) {
-					serverSocket.setSoTimeout(1000);
 					while (true) {
 						try (Socket socket = serverSocket.accept()) {
 							if (stop)
@@ -81,7 +80,7 @@ public class HybridServer {
 								}
 
 								if (request.getMethod() == HTTPRequestMethod.GET) {
-									if (!request.getResourceName().endsWith("html")
+									if (!request.getResourceName().equals("html")
 											&& !request.getResourceChain().equals("/")) {
 										response.setStatus(HTTPResponseStatus.S400);
 									} else {
@@ -95,13 +94,16 @@ public class HybridServer {
 											else
 												response.setContent(
 														pages.getPage(request.getResourceParameters().get("uuid")));
-											
+
 										}
 									}
 								}
 
 								if (request.getMethod() == HTTPRequestMethod.DELETE) {
-									pages.deletePage(request.getResourceParameters().get("uuid"));
+									if (!pages.exists(request.getResourceParameters().get("uuid")))
+										response.setStatus(HTTPResponseStatus.S404);
+									else
+										pages.deletePage(request.getResourceParameters().get("uuid"));
 								}
 							} catch (SQLException e) {
 								response.setStatus(HTTPResponseStatus.S500);
