@@ -9,11 +9,11 @@ import java.util.Properties;
 
 import es.uvigo.esei.dai.hybridserver.http.HTTPRequest;
 
-public class ServerDAO implements Page {
+public class ServerDAOxsd implements Page {
 
 	private Properties properties;
 
-	public ServerDAO(Properties properties) {
+	public ServerDAOxsd(Properties properties) {
 		// TODO Auto-generated constructor stub
 		this.properties = properties;
 	}
@@ -29,7 +29,7 @@ public class ServerDAO implements Page {
 		// TODO Auto-generated method stub
 		Connection connect;
 			connect = this.getConnection();
-		try(PreparedStatement statement=connect.prepareStatement("SELECT content FROM HTML WHERE uuid=?;")){
+		try(PreparedStatement statement=connect.prepareStatement("SELECT content FROM XSD WHERE uuid=?;")){
 			
 			statement.setString(1, uuid);
 			ResultSet res=statement.executeQuery();
@@ -44,7 +44,7 @@ public class ServerDAO implements Page {
 		// TODO Auto-generated method stub
 		Connection connect;
 			connect = this.getConnection();
-		try(PreparedStatement statement=connect.prepareStatement("INSERT INTO HTML (uuid,content) VALUES(?,?);")){
+		try(PreparedStatement statement=connect.prepareStatement("INSERT INTO XSD (uuid,content) VALUES(?,?);")){
 			
 			statement.setString(1, uuid);
 			statement.setString(2, request.getResourceParameters().get(request.getResourceName()));
@@ -58,7 +58,7 @@ public class ServerDAO implements Page {
 		// TODO Auto-generated method stub
 		Connection connect;
 			connect = this.getConnection();
-		try(PreparedStatement statement=connect.prepareStatement("DELETE FROM HTML WHERE uuid=?")){
+		try(PreparedStatement statement=connect.prepareStatement("DELETE FROM XSD WHERE uuid=?")){
 			
 			statement.setString(1, uuid);
 			int conf = statement.executeUpdate();
@@ -74,7 +74,7 @@ public class ServerDAO implements Page {
 		Connection connect;
 		StringBuilder list=new StringBuilder();
 			connect = this.getConnection();
-		try(PreparedStatement statement=connect.prepareStatement("SELECT uuid FROM HTML;")){
+		try(PreparedStatement statement=connect.prepareStatement("SELECT uuid FROM XSD;")){
 			
 			ResultSet res=statement.executeQuery();
 			while(res.next()){
@@ -89,7 +89,7 @@ public class ServerDAO implements Page {
 	public String createLink(String uuid)throws SQLException {
 		// TODO Auto-generated method stub
 		StringBuilder link = new StringBuilder();
-		link.append("<a href=\"html?uuid=");
+		link.append("<a href=\"xsd?uuid=");
 		link.append(uuid);
 		link.append("\">");
 		link.append(uuid);
@@ -102,7 +102,7 @@ public class ServerDAO implements Page {
 		// TODO Auto-generated method stub
 		Connection connect;
 			connect = this.getConnection();
-		try(PreparedStatement statement=connect.prepareStatement("SELECT count(content) as c FROM HTML WHERE uuid=? GROUP BY uuid;")){
+		try(PreparedStatement statement=connect.prepareStatement("SELECT count(content) as c FROM XSD WHERE uuid=? GROUP BY uuid;")){
 			int cont=0;
 			statement.setString(1, uuid);
 			ResultSet res=statement.executeQuery();

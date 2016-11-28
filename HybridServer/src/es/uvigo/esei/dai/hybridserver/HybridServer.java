@@ -32,7 +32,6 @@ public class HybridServer {
 		this.properties.setProperty("db.url", "jdbc:mysql://localhost:3306/hstestdb");
 		this.properties.setProperty("db.user", "hsdb");
 		this.properties.setProperty("db.password", "hsdbpass");
-		this.pages = new ServerDAO(properties);
 	}
 
 	public HybridServer(Map<String, String> pages) {
@@ -64,29 +63,66 @@ public class HybridServer {
 							HTTPRequest request = new HTTPRequest(new InputStreamReader(socket.getInputStream()));
 							HTTPResponse response = new HTTPResponse();
 
+							switch (request.getResourceName()) {
+							case "html":
+								pages = new ServerDAO(properties);
+								response.putParameter("Content-Type", "text/html");
+								break;
+							case "xml":
+								pages = new ServerDAOxml(properties);
+								response.putParameter("Content-Type", "application/xml");
+								break;
+							case "xsd":
+								pages = new ServerDAOxsd(properties);
+								response.putParameter("Content-Type", "application/xml");
+								break;
+							case "xslt":
+								pages = new ServerDAOxslt(properties);
+								response.putParameter("Content-Type", "application/xml");
+								break;
+							}
+
 							response.setStatus(HTTPResponseStatus.S200);
 							response.setVersion(request.getHttpVersion());
-							response.putParameter("Content-Type", "text/html");
 							try {
 								if (request.getMethod() == HTTPRequestMethod.POST) {
 									UUID randomUuid = UUID.randomUUID();
 									String uuid = randomUuid.toString();
-									if (request.getResourceParameters().get("html") == null)
-										response.setStatus(HTTPResponseStatus.S400);
-									else {
-										pages.createPage(uuid, request.getResourceParameters().get("html"));
-										response.setContent(pages.createLink(uuid));
+									if (request.getResourceName().equals("xslt")) {
+										if (request.getResourceParameters().get("xsd") == null) {
+											response.setStatus(HTTPResponseStatus.S400);
+										} else if (!((ServerDAOxslt) pages)
+												.existsXSD(request.getResourceParameters().get("xsd"))) {
+											response.setStatus(HTTPResponseStatus.S404);
+										}
+									}
+									if (response.getStatus() == HTTPResponseStatus.S200) {
+										if (request.getResourceParameters().get(request.getResourceName()) == null)
+											response.setStatus(HTTPResponseStatus.S400);
+										else {
+											System.out.println("CREATE");
+											System.out.println(request.getContent());
+											pages.createPage(uuid, request);
+											response.setContent(pages.createLink(uuid));
+											System.out.println(response);
+										}
 									}
 								}
 
 								if (request.getMethod() == HTTPRequestMethod.GET) {
 									if (!request.getResourceName().equals("html")
+											&& !request.getResourceName().equals("xml")
+											&& !request.getResourceName().equals("xsd")
+											&& !request.getResourceName().equals("xslt")
 											&& !request.getResourceChain().equals("/")) {
 										response.setStatus(HTTPResponseStatus.S400);
 									} else {
 										if (request.getResourceChain().equals("/"))
 											response.setContent("Hybrid Server");
-										else if (request.getResourceChain().equals("/html")) {
+										else if (request.getResourceChain().equals("/html")
+												|| request.getResourceChain().equals("/xml")
+												|| request.getResourceChain().equals("/xsd")
+												|| request.getResourceChain().equals("/xslt")) {
 											response.setContent(pages.listPages());
 										} else {
 											if (!pages.exists(request.getResourceParameters().get("uuid")))
