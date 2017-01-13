@@ -11,24 +11,16 @@ import es.uvigo.esei.dai.hybridserver.http.HTTPRequest;
 
 public class ServerDAOxslt implements Page {
 
-	private Properties properties;
+	private Connection connect;
 
-	public ServerDAOxslt(Properties properties) {
+	public ServerDAOxslt(Connection connect) {
 		// TODO Auto-generated constructor stub
-		this.properties = properties;
-	}
-
-	public Connection getConnection() throws SQLException {
-
-		return DriverManager.getConnection(this.properties.getProperty("db.url"),
-				this.properties.getProperty("db.user"), this.properties.getProperty("db.password"));
+		this.connect = connect;
 	}
 
 	@Override
 	public String getPage(String uuid) throws SQLException {
 		// TODO Auto-generated method stub
-		Connection connect;
-		connect = this.getConnection();
 		try (PreparedStatement statement = connect.prepareStatement("SELECT content FROM XSLT WHERE uuid=?;")) {
 
 			statement.setString(1, uuid);
@@ -43,8 +35,6 @@ public class ServerDAOxslt implements Page {
 	@Override
 	public void createPage(String uuid, HTTPRequest request) throws SQLException {
 		// TODO Auto-generated method stub
-		Connection connect;
-		connect = this.getConnection();
 		try (PreparedStatement statement = connect
 				.prepareStatement("INSERT INTO XSLT (uuid,content,xsd) VALUES(?,?,?);")) {
 
@@ -59,8 +49,6 @@ public class ServerDAOxslt implements Page {
 	@Override
 	public boolean deletePage(String uuid) throws SQLException {
 		// TODO Auto-generated method stub
-		Connection connect;
-		connect = this.getConnection();
 		try (PreparedStatement statement = connect.prepareStatement("DELETE FROM XSLT WHERE uuid=?")) {
 
 			statement.setString(1, uuid);
@@ -75,9 +63,7 @@ public class ServerDAOxslt implements Page {
 	@Override
 	public String listPages() throws SQLException {
 		// TODO Auto-generated method stub
-		Connection connect;
 		StringBuilder list = new StringBuilder();
-		connect = this.getConnection();
 		try (PreparedStatement statement = connect.prepareStatement("SELECT uuid FROM XSLT;")) {
 
 			ResultSet res = statement.executeQuery();
@@ -104,8 +90,6 @@ public class ServerDAOxslt implements Page {
 	@Override
 	public boolean exists(String uuid) throws SQLException {
 		// TODO Auto-generated method stub
-		Connection connect;
-		connect = this.getConnection();
 		try (PreparedStatement statement = connect
 				.prepareStatement("SELECT count(content) as c FROM XSLT WHERE uuid=? GROUP BY uuid;")) {
 			int cont = 0;
@@ -121,8 +105,6 @@ public class ServerDAOxslt implements Page {
 	}
 
 	public boolean existsXSD(String uuid) throws SQLException {
-		Connection connect;
-		connect = this.getConnection();
 		try (PreparedStatement statement = connect
 				.prepareStatement("SELECT count(content) as c FROM XSD WHERE uuid=? GROUP BY uuid;")) {
 			int cont = 0;
@@ -135,5 +117,16 @@ public class ServerDAOxslt implements Page {
 
 		}
 		return false;
+	}
+
+	public String getXSD(String uuid) throws SQLException {
+		String xsd = null;
+		try (PreparedStatement statement = connect.prepareStatement("SELECT xsd FROM XSLT WHERE uuid=?;")) {
+			statement.setString(1, uuid);
+			ResultSet res = statement.executeQuery();
+			if (res.next())
+				xsd = res.getString("xsd");
+		}
+		return xsd;
 	}
 }

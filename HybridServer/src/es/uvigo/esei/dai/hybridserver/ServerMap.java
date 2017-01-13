@@ -3,6 +3,8 @@ package es.uvigo.esei.dai.hybridserver;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import es.uvigo.esei.dai.hybridserver.http.HTTPRequest;
+
 
 public class ServerMap implements Page {
 	private Map<String, String> db=new LinkedHashMap<>();
@@ -18,10 +20,10 @@ public class ServerMap implements Page {
 	}
 
 	@Override
-	public void createPage(String uuid,String content) {
+	public void createPage(String uuid,HTTPRequest request) {
 		// TODO Auto-generated method stub
 
-		this.db.put(uuid, content);
+		this.db.put(uuid, request.getResourceParameters().get(request.getResourceName()));
 	}
 
 	@Override

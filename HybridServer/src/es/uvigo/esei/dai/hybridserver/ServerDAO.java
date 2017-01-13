@@ -11,24 +11,16 @@ import es.uvigo.esei.dai.hybridserver.http.HTTPRequest;
 
 public class ServerDAO implements Page {
 
-	private Properties properties;
+	private Connection connect;
 
-	public ServerDAO(Properties properties) {
+	public ServerDAO(Connection connect) {
 		// TODO Auto-generated constructor stub
-		this.properties = properties;
-	}
-
-	public Connection getConnection() throws SQLException {
-
-		return DriverManager.getConnection(this.properties.getProperty("db.url"),
-				this.properties.getProperty("db.user"), this.properties.getProperty("db.password"));
+		this.connect = connect;
 	}
 
 	@Override
 	public String getPage(String uuid)throws SQLException {
 		// TODO Auto-generated method stub
-		Connection connect;
-			connect = this.getConnection();
 		try(PreparedStatement statement=connect.prepareStatement("SELECT content FROM HTML WHERE uuid=?;")){
 			
 			statement.setString(1, uuid);
@@ -42,8 +34,6 @@ public class ServerDAO implements Page {
 	@Override
 	public void createPage(String uuid, HTTPRequest request) throws SQLException{
 		// TODO Auto-generated method stub
-		Connection connect;
-			connect = this.getConnection();
 		try(PreparedStatement statement=connect.prepareStatement("INSERT INTO HTML (uuid,content) VALUES(?,?);")){
 			
 			statement.setString(1, uuid);
@@ -56,8 +46,6 @@ public class ServerDAO implements Page {
 	@Override
 	public boolean deletePage(String uuid) throws SQLException{
 		// TODO Auto-generated method stub
-		Connection connect;
-			connect = this.getConnection();
 		try(PreparedStatement statement=connect.prepareStatement("DELETE FROM HTML WHERE uuid=?")){
 			
 			statement.setString(1, uuid);
@@ -71,9 +59,7 @@ public class ServerDAO implements Page {
 	@Override
 	public String listPages()throws SQLException {
 		// TODO Auto-generated method stub
-		Connection connect;
 		StringBuilder list=new StringBuilder();
-			connect = this.getConnection();
 		try(PreparedStatement statement=connect.prepareStatement("SELECT uuid FROM HTML;")){
 			
 			ResultSet res=statement.executeQuery();
@@ -100,8 +86,6 @@ public class ServerDAO implements Page {
 	@Override
 	public boolean exists(String uuid) throws SQLException{
 		// TODO Auto-generated method stub
-		Connection connect;
-			connect = this.getConnection();
 		try(PreparedStatement statement=connect.prepareStatement("SELECT count(content) as c FROM HTML WHERE uuid=? GROUP BY uuid;")){
 			int cont=0;
 			statement.setString(1, uuid);
