@@ -9,6 +9,8 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.xml.ws.Endpoint;
+
 public class HybridServer {
 	private int SERVICE_PORT = 8888;
 	private Thread serverThread;
@@ -17,6 +19,7 @@ public class HybridServer {
 	private Properties properties = new Properties();
 	private int tipo;
 	private Configuration config= new Configuration();
+	private Endpoint ep;
 
 	public HybridServer() {
 		// TODO Auto-generated constructor stub
@@ -61,6 +64,7 @@ public class HybridServer {
 		// TODO Auto-generated constructor stub
 		this.config=config;
 		this.SERVICE_PORT=this.config.getHttpPort();
+		this.ep=null;
 		this.tipo=4;
 	}
 
@@ -69,6 +73,9 @@ public class HybridServer {
 	}
 
 	public void start() {
+		if(this.tipo==4 && config.getWebServiceURL()!=null){
+			this.ep=Endpoint.publish(config.getWebServiceURL(), new ServiceImp(config));
+		}
 		this.serverThread = new Thread() {
 			@Override
 			public void run() {
@@ -121,5 +128,7 @@ public class HybridServer {
 		}
 
 		this.serverThread = null;
+		
+		if(this.tipo==4 && config.getWebServiceURL()!=null)this.ep.stop();
 	}
 }

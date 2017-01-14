@@ -1,5 +1,6 @@
 package es.uvigo.esei.dai.hybridserver;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -10,6 +11,22 @@ public class Launcher {
 		
 		boolean map=false;
 		if(args.length==1){
+			if(args[0].toLowerCase().endsWith(".xml")){
+				try {
+					File reader=new File(args[0]);
+					Configuration config=new Configuration();
+					XMLConfigurationLoader loader = new XMLConfigurationLoader();
+					config = loader.load(reader);
+					HybridServer hybrid=new HybridServer(config);
+					hybrid.start();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					System.err.println("Problemas con el fichero de entrada"+e.getMessage());
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}else{
 			try {
 				FileReader reader=new FileReader(args[0]);
 				Properties prop=new Properties();
@@ -20,6 +37,7 @@ public class Launcher {
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				System.err.println("Problemas con el fichero de entrada"+e.getMessage());
+			}
 			}
 		}else{
 			if(map){
