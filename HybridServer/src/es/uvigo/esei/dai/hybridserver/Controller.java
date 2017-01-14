@@ -20,6 +20,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
@@ -46,6 +47,9 @@ public class Controller {
 	public HTTPResponse getResponse(HTTPRequest request, Connection connect, Page pages, Configuration config) {
 
 		HTTPResponse response = new HTTPResponse();
+		response.setStatus(HTTPResponseStatus.S200);
+		response.setVersion(request.getHttpVersion());
+
 		if (connect != null) {
 			switch (request.getResourceName()) {
 			case "html":
@@ -64,12 +68,12 @@ public class Controller {
 				pages = new ServerDAOxslt(connect);
 				response.putParameter("Content-Type", "application/xml");
 				break;
+			default:
+				response.setStatus(HTTPResponseStatus.S400);
+				break;
 			}
 		}
-		
-		response.setStatus(HTTPResponseStatus.S200);
-		response.setVersion(request.getHttpVersion());
-		
+
 		try {
 			if (request.getMethod() == HTTPRequestMethod.POST) {
 				UUID randomUuid = UUID.randomUUID();
@@ -98,9 +102,10 @@ public class Controller {
 						&& !request.getResourceChain().equals("/")) {
 					response.setStatus(HTTPResponseStatus.S400);
 				} else {
-					if (request.getResourceChain().equals("/"))
+					if (request.getResourceChain().equals("/")) {
+						response.setStatus(HTTPResponseStatus.S200);
 						response.setContent("Hybrid Server");
-					else if (request.getResourceChain().equals("/html") || request.getResourceChain().equals("/xml")
+					} else if (request.getResourceChain().equals("/html") || request.getResourceChain().equals("/xml")
 							|| request.getResourceChain().equals("/xsd")
 							|| request.getResourceChain().equals("/xslt")) {
 						toret.append(pages.listPages());
@@ -114,88 +119,87 @@ public class Controller {
 						}
 						response.setContent(toret.toString());
 					} else {
-						if (!pages.exists(request.getResourceParameters().get("uuid"))) {
+						if (request.getResourceName().equals("xml")
+								&& request.getResourceParameters().get("xslt") != null) {
+							String xml = request.getResourceParameters().get("uuid");
+							String xslt = request.getResourceParameters().get("xslt");
+							ServerDAOxslt auxDAO = new ServerDAOxslt(connect);
+							String xsd = auxDAO.getXSD(xslt);
+
 							List<HybridService> remoteService = this.getServices(config);
-							String content = null;
-							if (!remoteService.isEmpty()) {
-								for (HybridService hybridService : remoteService) {
-									if (hybridService.exists(request.getResourceName(),
-											request.getResourceParameters().get("uuid"))){
-										content = hybridService.getPage(request.getResourceName(),
-												request.getResourceParameters().get("uuid"));
+							if (xsd == null) {
+								if (!remoteService.isEmpty()) {
+									for (HybridService hybridService : remoteService) {
+										xsd = hybridService.getXSD(xslt);
+										if (xsd != null)
+											break;
 									}
-
 								}
 							}
-							if (content != null) {
-								response.setContent(content);
-							} else{
+							boolean existsXSLT = false;
+							if (!auxDAO.exists(xslt)) {
+								if (!remoteService.isEmpty()) {
+									for (HybridService hybridService : remoteService) {
+										if (hybridService.exists("xslt", xslt)) {
+											existsXSLT = true;
+											break;
+										}
+									}
+								}
+							} else
+								existsXSLT = true;
+
+							if (!existsXSLT)
 								response.setStatus(HTTPResponseStatus.S404);
-							}
+							else {
 
-						} else {
-							if (request.getResourceName().equals("xml")
-									&& request.getResourceParameters().get("xslt") != null) {
-								String xml = request.getResourceParameters().get("uuid");
-								String xslt = request.getResourceParameters().get("xslt");
-								ServerDAOxslt auxDAO = new ServerDAOxslt(connect);
-								String xsd = auxDAO.getXSD(xslt);
-								if (auxDAO.exists(xslt)) {
-									try {
-										if (validar(connect, xml, xsd) == null) {
-											response.setStatus(HTTPResponseStatus.S400);
-										} else {
-											response.removeParameter("Content-Type");
-											response.putParameter("Content-Type", "text/html");
-											response.setContent(transformXSLT(connect, xml, xslt));
-										}
-									} catch (TransformerException e) {
+								try {
+									if (validar(connect, remoteService, xml, xsd) == null) {
 										response.setStatus(HTTPResponseStatus.S400);
-									} catch (IOException e) {
-										response.setStatus(HTTPResponseStatus.S400);
-									} catch (ParserConfigurationException e) {
-										// TODO Auto-generated catch block
-										response.setStatus(HTTPResponseStatus.S400);
-									} catch (SAXException e) {
-										// TODO Auto-generated catch block
-										response.setStatus(HTTPResponseStatus.S400);
-									} catch (TransformerFactoryConfigurationError e) {
-										// TODO Auto-generated catch block
-										response.setStatus(HTTPResponseStatus.S400);
-									}
-								} else {
-									List<HybridService> remoteService = this.getServices(config);
-									String content = null;
-									if (!remoteService.isEmpty()) {
-										for (HybridService hybridService : remoteService) {
-											if (hybridService.exists("xslt", request.getResourceParameters().get("xslt"))) {
-												xml = request.getResourceParameters().get("uuid");
-												xslt = request.getResourceParameters().get("xslt");
-												xsd = hybridService.getXSD(xslt);
-												if (validar(hybridService, xml, xsd) == null) {
-													response.setStatus(HTTPResponseStatus.S400);
-												} else {
-													response.removeParameter("Content-Type");
-													response.putParameter("Content-Type", "text/html");
-													response.setContent(transformXSLT(hybridService, xml, xslt));
-													content = transformXSLT(hybridService, xml, xslt);
-													break;
-												}
-											}else{
-												System.out.println("cheguei");
-												response.setStatus(HTTPResponseStatus.S404);												
-											}
-
-										}
-
-									}
-									if (content != null) {
-										response.setContent(content);
 									} else {
-										response.setStatus(HTTPResponseStatus.S404);
+										response.removeParameter("Content-Type");
+										response.putParameter("Content-Type", "text/html");
+										response.setContent(transformXSLT(connect, remoteService, xml, xslt));
 									}
-									//response.setStatus(HTTPResponseStatus.S404);
+								} catch (SAXException | ParserConfigurationException | IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+									response.setStatus(HTTPResponseStatus.S400);
+								} catch (TransformerFactoryConfigurationError e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+									response.setStatus(HTTPResponseStatus.S400);
+								} catch (TransformerException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+									response.setStatus(HTTPResponseStatus.S400);
+								}catch (NullPointerException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+									response.setStatus(HTTPResponseStatus.S404);
 								}
+
+							}
+						} else {
+							if (!pages.exists(request.getResourceParameters().get("uuid"))) {
+								List<HybridService> remoteService = this.getServices(config);
+								String content = null;
+								if (!remoteService.isEmpty()) {
+									for (HybridService hybridService : remoteService) {
+										if (hybridService.exists(request.getResourceName(),
+												request.getResourceParameters().get("uuid"))) {
+											content = hybridService.getPage(request.getResourceName(),
+													request.getResourceParameters().get("uuid"));
+										}
+
+									}
+								}
+								if (content != null) {
+									response.setContent(content);
+								} else {
+									response.setStatus(HTTPResponseStatus.S404);
+								}
+
 							} else {
 								response.setContent(pages.getPage(request.getResourceParameters().get("uuid")));
 							}
@@ -203,44 +207,52 @@ public class Controller {
 					}
 				}
 
-				if (request.getMethod() == HTTPRequestMethod.DELETE) {
-					if (!pages.exists(request.getResourceParameters().get("uuid")))
-						response.setStatus(HTTPResponseStatus.S404);
-					else
-						pages.deletePage(request.getResourceParameters().get("uuid"));
-				}
+			}
+			if (request.getMethod() == HTTPRequestMethod.DELETE) {
+				if (!pages.exists(request.getResourceParameters().get("uuid")))
+					response.setStatus(HTTPResponseStatus.S404);
+				else
+					pages.deletePage(request.getResourceParameters().get("uuid"));
 			}
 		} catch (SQLException e) {
+			e.printStackTrace();
 			response.setStatus(HTTPResponseStatus.S500);
-		} catch (ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SAXException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerFactoryConfigurationError e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		return response;
 	}
 
-	public Document validar(Connection connect, String xml, String xsd)
-			throws ParserConfigurationException, SAXException, IOException, SQLException {
+	public Document validar(Connection connect, List<HybridService> remoteService, String xml, String xsd)
+			throws SQLException, SAXException, ParserConfigurationException, IOException, NullPointerException {
 		SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		ServerDAOxml auxDAOXML = new ServerDAOxml(connect);
 		ServerDAOxsd auxDAOXSD = new ServerDAOxsd(connect);
 
+		String contentXML = auxDAOXML.getPage(xml);
+		String contentXSD = auxDAOXSD.getPage(xsd);
+
+		if (contentXML == null) {
+			for (HybridService hybridService : remoteService) {
+				if (hybridService.exists("xml", xml)) {
+					contentXML = hybridService.getPage("xml", xml);
+					if (contentXML != null)break;
+				}
+
+			}
+		}
+		if (contentXSD == null) {
+			for (HybridService hybridService : remoteService) {
+				if (hybridService.exists("xsd", xsd)) {
+					contentXSD = hybridService.getPage("xsd", xsd);
+					if (contentXSD != null)
+						break;
+				}
+
+			}
+		}
 		BufferedReader readerXML = new BufferedReader(
-				new InputStreamReader(new ByteArrayInputStream(auxDAOXML.getPage(xml).getBytes())));
+				new InputStreamReader(new ByteArrayInputStream(contentXML.getBytes())));
 		BufferedReader readerXSD = new BufferedReader(
-				new InputStreamReader(new ByteArrayInputStream(auxDAOXSD.getPage(xsd).getBytes())));
+				new InputStreamReader(new ByteArrayInputStream(contentXSD.getBytes())));
 
 		Source sourceXSD = new StreamSource(readerXSD);
 		InputSource inputSourceXML = new InputSource(readerXML);
@@ -257,58 +269,37 @@ public class Controller {
 		return doc.parse(inputSourceXML);
 
 	}
-	
-	public Document validar(HybridService hybridService, String xml, String xsd)
-			throws ParserConfigurationException, SAXException, IOException, SQLException {
-		SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 
-		BufferedReader readerXML = new BufferedReader(
-				new InputStreamReader(new ByteArrayInputStream(hybridService.getPage("xml",xml).getBytes())));
-		BufferedReader readerXSD = new BufferedReader(
-				new InputStreamReader(new ByteArrayInputStream(hybridService.getPage("xml",xsd).getBytes())));
-
-		Source sourceXSD = new StreamSource(readerXSD);
-		InputSource inputSourceXML = new InputSource(readerXML);
-		Schema schema = factory.newSchema(sourceXSD);
-
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-		docFactory.setValidating(false);
-		docFactory.setNamespaceAware(true);
-		docFactory.setSchema(schema);
-
-		DocumentBuilder doc = docFactory.newDocumentBuilder();
-		doc.setErrorHandler(new SimpleErrorHandler());
-
-		return doc.parse(inputSourceXML);
-
-	}
-
-	public String transformXSLT(Connection connect, String xml, String xslt)
-			throws SQLException, TransformerFactoryConfigurationError, TransformerException {
+	public String transformXSLT(Connection connect, List<HybridService> remoteService, String xml, String xslt)
+			throws SQLException, TransformerFactoryConfigurationError, TransformerException, NullPointerException {
 		ServerDAOxml auxDAOXML = new ServerDAOxml(connect);
 		ServerDAOxslt auxDAOXSLT = new ServerDAOxslt(connect);
 
+		String contentXML = auxDAOXML.getPage(xml);
+		String contentXSLT = auxDAOXSLT.getPage(xslt);
+
+		if (contentXML == null) {
+			for (HybridService hybridService : remoteService) {
+				if (hybridService.exists("xml", xml)) {
+					contentXML = hybridService.getPage("xml", xml);
+					break;
+				}
+
+			}
+		}
+		if (contentXSLT == null) {
+			for (HybridService hybridService : remoteService) {
+				if (hybridService.exists("xslt", xslt)) {
+					contentXSLT = hybridService.getPage("xslt", xslt);
+					break;
+				}
+
+			}
+		}
 		BufferedReader readerXML = new BufferedReader(
-				new InputStreamReader(new ByteArrayInputStream(auxDAOXML.getPage(xml).getBytes())));
+				new InputStreamReader(new ByteArrayInputStream(contentXML.getBytes())));
 		BufferedReader readerXSLT = new BufferedReader(
-				new InputStreamReader(new ByteArrayInputStream(auxDAOXSLT.getPage(xslt).getBytes())));
-
-		Transformer transform = TransformerFactory.newInstance().newTransformer(new StreamSource(readerXSLT));
-
-		StringWriter writer = new StringWriter();
-		transform.transform(new StreamSource(readerXML), new StreamResult(writer));
-
-		return writer.toString();
-	}
-	
-	public String transformXSLT(HybridService hybridService, String xml, String xslt)
-			throws SQLException, TransformerFactoryConfigurationError, TransformerException {
-		
-		BufferedReader readerXML = new BufferedReader(
-				new InputStreamReader(new ByteArrayInputStream(hybridService.getPage("xml",xml).getBytes())));
-		BufferedReader readerXSLT = new BufferedReader(
-				new InputStreamReader(new ByteArrayInputStream(hybridService.getPage("xml",xslt).getBytes())));
-
+				new InputStreamReader(new ByteArrayInputStream(contentXSLT.getBytes())));
 		Transformer transform = TransformerFactory.newInstance().newTransformer(new StreamSource(readerXSLT));
 
 		StringWriter writer = new StringWriter();
@@ -325,7 +316,7 @@ public class Controller {
 			List<ServerConfiguration> servers = config.getServers();
 
 			for (int i = 0; i < servers.size(); i++) {
-				Service service;
+				Service service = null;
 				try {
 					String wsdlURL = servers.get(i).getWsdl();
 					String namespaceWSDL = servers.get(i).getNamespace();
@@ -335,10 +326,8 @@ public class Controller {
 				} catch (MalformedURLException e) {
 					// TODO Auto-generated catch block
 					System.out.println(e.getMessage());
-				} catch (WebServiceException webSe) {
-					System.err.println("Error WebService: " + webSe.getMessage());
 				} catch (Exception e) {
-					e.printStackTrace();
+					// e.printStackTrace();
 				}
 			}
 		}

@@ -26,7 +26,7 @@ public class Hilo implements Runnable {
 	private Socket socket;
 	private Configuration config;
 	private Connection connect;
-	private Controller controller=new Controller();
+	private Controller controller = new Controller();
 	private boolean db;
 
 	public Hilo(Socket socket) {
@@ -37,14 +37,14 @@ public class Hilo implements Runnable {
 		this.properties.setProperty("db.url", "jdbc:mysql://localhost:3306/hstestdb");
 		this.properties.setProperty("db.user", "hsdb");
 		this.properties.setProperty("db.password", "hsdbpass");
-		this.db=false;
+		this.db = false;
 	}
 
 	public Hilo(Socket socket, Page pages) {
 		// TODO Auto-generated constructor stub
 		this.socket = socket;
 		this.pages = pages;
-		this.db=true;
+		this.db = false;
 	}
 
 	public Hilo(Socket socket, Properties properties) {
@@ -58,7 +58,7 @@ public class Hilo implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		this.db=true;
+		this.db = true;
 	}
 
 	public Hilo(Socket socket, Configuration config) {
@@ -66,13 +66,13 @@ public class Hilo implements Runnable {
 		this.socket = socket;
 		this.config = config;
 		try {
-			this.connect = DriverManager.getConnection(this.config.getDbURL(),
-					this.config.getDbUser(), this.config.getDbPassword());
+			this.connect = DriverManager.getConnection(this.config.getDbURL(), this.config.getDbUser(),
+					this.config.getDbPassword());
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		this.db=true;
+		this.db = true;
 	}
 
 	@Override
@@ -82,8 +82,8 @@ public class Hilo implements Runnable {
 			// Responder al cliente
 			HTTPRequest request = new HTTPRequest(new InputStreamReader(socket.getInputStream()));
 			HTTPResponse response = new HTTPResponse();
-			
-			if(!db){
+
+			if (!db) {
 				response.setStatus(HTTPResponseStatus.S200);
 				response.setVersion(request.getHttpVersion());
 				try {
@@ -115,7 +115,8 @@ public class Hilo implements Runnable {
 						} else {
 							if (request.getResourceChain().equals("/"))
 								response.setContent("Hybrid Server");
-							else if (request.getResourceChain().equals("/html") || request.getResourceChain().equals("/xml")
+							else if (request.getResourceChain().equals("/html")
+									|| request.getResourceChain().equals("/xml")
 									|| request.getResourceChain().equals("/xsd")
 									|| request.getResourceChain().equals("/xslt")) {
 								response.setContent(pages.listPages());
@@ -138,12 +139,11 @@ public class Hilo implements Runnable {
 				} catch (SQLException e) {
 					response.setStatus(HTTPResponseStatus.S500);
 				}
-			}else{
-			
-			response=this.controller.getResponse(request, connect, pages, config);
-			
+			} else {
+				response = this.controller.getResponse(request, connect, pages, config);
+
 			}
-			
+
 			OutputStreamWriter osw = new OutputStreamWriter(socket.getOutputStream());
 			response.print(osw);
 			osw.flush();
