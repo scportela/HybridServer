@@ -3,13 +3,10 @@ package es.uvigo.esei.dai.hybridserver;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 

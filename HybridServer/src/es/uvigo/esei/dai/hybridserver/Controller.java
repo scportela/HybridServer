@@ -20,7 +20,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
@@ -29,13 +28,11 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.ws.Service;
-import javax.xml.ws.WebServiceException;
 
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.sun.media.sound.RealTimeSequencerProvider;
 
 import es.uvigo.esei.dai.hybridserver.http.HTTPRequest;
 import es.uvigo.esei.dai.hybridserver.http.HTTPRequestMethod;
@@ -108,13 +105,18 @@ public class Controller {
 					} else if (request.getResourceChain().equals("/html") || request.getResourceChain().equals("/xml")
 							|| request.getResourceChain().equals("/xsd")
 							|| request.getResourceChain().equals("/xslt")) {
+						toret.append("<h1>Local Server</h1>");
 						toret.append(pages.listPages());
 						List<HybridService> remoteService = this.getServices(config);
 						if (!remoteService.isEmpty()) {
+							int i=1;
 							for (HybridService hybridService : remoteService) {
 								String content = hybridService.listPages(request.getResourceName());
-								if (!content.isEmpty())
+								if (!content.isEmpty()){
+									toret.append("<h1>Server"+i+"</h1>");
 									toret.append(content);
+								}
+								i++;
 							}
 						}
 						response.setContent(toret.toString());
